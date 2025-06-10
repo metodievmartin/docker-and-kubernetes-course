@@ -1,0 +1,27 @@
+# .dockerignore file
+# ------------------------------
+# This file specifies which files and directories should be excluded when copying files
+# to the Docker image using the COPY command in the Dockerfile.
+# Similar to .gitignore, it helps keep your Docker image clean and minimal.
+
+# Exclude the Dockerfile itself
+# We don't need the Dockerfile inside our image as it's only used for building
+Dockerfile
+
+# Exclude node_modules directory
+# Since we run 'npm install' inside the container, we don't need to copy
+# the local node_modules folder, which might contain platform-specific dependencies
+node_modules
+
+# Exclude macOS system files
+# These are macOS-specific files that have no use in the container
+.DS_Store
+
+# Exclude IDE configuration files
+# IDE-specific files and directories are not needed in the container
+.idea
+
+# Exclude Git directory
+# The Git repository metadata is not needed in the container
+# This significantly reduces the image size if you have a large Git history
+.git
