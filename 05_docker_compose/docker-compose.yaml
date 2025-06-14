@@ -1,0 +1,111 @@
+# Docker Compose file version - historically used to specify the compatibility level
+# As of Docker Compose V2, the version field is obsolete and will be ignored
+# It's kept here (commented out) for reference and compatibility with older documentation
+# version: "3.8"
+
+# The Services section defines the containers that make up your application
+services:
+  # MongoDB service configuration
+  mongodb:
+    # Use the official MongoDB image version 5
+    # No need to add -d (detached) and --rm flags as they are the default in Docker Compose
+    image: 'mongo:5'
+    
+    # You can specify a custom container name if needed
+    # container_name: mongodb
+    
+    # Volumes for data persistence
+    volumes:
+      # Named volume 'data' mapped to MongoDB's data directory
+      # This ensures database data persists even if the container is removed
+      - data:/data/db
+    
+    # Environment variables can be defined inline
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=user
+    #   - MONGO_INITDB_ROOT_PASSWORD=password
+    
+    # Using environment variables from a file is more secure and maintainable
+    # This keeps sensitive data out of your docker-compose file
+    env_file:
+      - ./env/mongo.env
+  
+  # Node.js backend service configuration
+  backend:
+    # Build the image using the Dockerfile in the ./backend directory
+    # This is the shorthand syntax for simple builds
+    build: ./backend
+    
+    # Alternative expanded syntax for more complex build configurations
+    # build:
+    #   context: ./backend     # The build context directory
+    #   dockerfile: Dockerfile # The Dockerfile to use (default is 'Dockerfile')
+    #   args:                  # Build arguments to pass to the Dockerfile
+    #     - ARG_ONE=one
+    
+    # Port mapping - maps host port 8080 to container port 80
+    ports:
+      - '8080:80'
+    
+    # Volume configurations for the backend
+    volumes:
+      # Named volume for logs persistence
+      - logs:/app/logs
+      
+      # Bind mount for live code updates
+      # Maps the local backend directory to /app in the container
+      # Using relative paths instead of absolute paths (a Docker Compose advantage)
+      - ./backend:/app
+      
+      # Anonymous volume to prevent the bind mount from overwriting node_modules
+      # This ensures the container uses the node_modules installed during image build
+      - /app/node_modules
+    
+    # Load environment variables from a file
+    env_file:
+      - ./env/backend.env
+    
+    # Dependency configuration - ensures mongodb starts before this service
+    # Note: This only waits for the container to start, not for MongoDB to be ready
+    depends_on:
+      - mongodb
+  
+  # React frontend service configuration
+  frontend:
+    # Build the image using the Dockerfile in the ./frontend directory
+    build: ./frontend
+    
+    # Port mapping - maps host port 3000 to container port 3000
+    # This is the default port for React's development server
+    ports:
+      - '3000:3000'
+    
+    # Volume configurations for the frontend
+    volumes:
+      # Bind mount only the src directory for live code updates
+      # This allows you to make changes to React code without rebuilding the container
+      - ./frontend/src:/app/src
+      
+      # Anonymous volume to prevent the bind mount from overwriting node_modules
+      - /app/node_modules
+    
+    # Keep STDIN open - equivalent to 'docker run -i'
+    # Required for interactive processes like React's development server
+    stdin_open: true
+    
+    # Allocate a pseudo-TTY - equivalent to 'docker run -t'
+    # Combined with stdin_open, this is equivalent to 'docker run -it'
+    # Required for interactive processes like React's development server
+    tty: true
+    
+    # Ensures the backend service starts before the frontend
+    depends_on:
+      - backend
+
+# Named volumes definition
+# These volumes persist data even when containers are removed
+volumes:
+  # Volume for MongoDB data
+  data:
+  # Volume for application logs
+  logs:
