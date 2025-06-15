@@ -1,0 +1,14 @@
+{
+  "name": "test-from-compose",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martin Metodiev",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
